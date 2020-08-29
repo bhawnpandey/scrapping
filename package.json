@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/bhawnpandey/scrapping/issues"
   },
-  "homepage": "https://github.com/bhawnpandey/scrapping#readme"
+  "homepage": "https://github.com/bhawnpandey/scrapping#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "unirest": "^0.6.0"
+  }
 }
