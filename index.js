@@ -1,6 +1,8 @@
 const unirest = require('unirest');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const { Parser } = require('json2csv');
+
 
 const urls = [
   "https://www.imdb.com/title/tt7286456/?ref_=hm_fanfav_tt_2_pd_fp1",
@@ -40,5 +42,9 @@ const urls = [
             moviesData.push({title, rating, image, ratingCount, releaseDate, genres});
      }
     console.log("data", moviesData);
-    fs.writeFileSync('./data.json', JSON.stringify(moviesData), 'utf-8');
+    const json2csvParser = new Parser();
+    const csv = json2csvParser.parse(moviesData);
+
+    fs.writeFileSync('./data.csv', csv, 'utf-8');
+
 })();
