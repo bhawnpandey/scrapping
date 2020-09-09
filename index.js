@@ -33,7 +33,9 @@ const urls = [
             let image = $('div[class="poster"] > a > img').attr('src');
             let ratingCount = $('div[class="imdbRating"] > a > span').text();
             let releaseDate = $('a[title="See more release dates"]').text().trim();
-
+            //selector by Chrome
+            let popularity = $('#title-overview-widget > div.plot_summary_wrapper.localized > div.titleReviewBar > div:nth-child(5) > div.titleReviewBarSubItem > div:nth-child(2) > span').text().trim();
+            console.log("popularity", popularity);
             let genres =[];
             $('div[class="title_wrapper"] a[href^="/search/title?genres"]').each((i, ele)=>{
               let data = $(ele).text();
