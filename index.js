@@ -46,10 +46,18 @@ const urls = [{
                genres.push(data);
             });
             moviesData.push({title, rating, image, ratingCount, releaseDate, genres});
-            const res = await fetch(image);
-            const buffer = await res.buffer();
-            fs.writeFile(`./${url.id}.jpg`, buffer, () =>
-             console.log('finished downloading!'));
+           let data = await new Promise(async(resolve, reject)=>{
+              try{
+                const res = await fetch(image);
+                const buffer = await res.buffer();
+                fs.writeFile(`./${url.id}.jpg`, buffer, () =>
+                 resolve('finished downloading!'));
+              }catch(err){
+                reject(err);
+              }
+           });
+           console.log("image data", data);
+
      }
     console.log("data", moviesData);
     // const json2csvParser = new Parser();
