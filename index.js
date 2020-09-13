@@ -2,18 +2,22 @@ const unirest = require('unirest');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const { Parser } = require('json2csv');
+const fetch = require('node-fetch');
 
 
-const urls = [
-  "https://www.imdb.com/title/tt7286456/?ref_=hm_fanfav_tt_2_pd_fp1",
-  "https://www.imdb.com/title/tt4154796/?ref_=ttls_li_tt"
-];
+const urls = [{
+              url: "https://www.imdb.com/title/tt7286456/?ref_=hm_fanfav_tt_2_pd_fp1",
+              id: "joker"
+            },{
+              url: "https://www.imdb.com/title/tt4154796/?ref_=ttls_li_tt",
+              id: "avengers_end_game"
+           }];
 
 
 (async() => {
   let moviesData = [];
   for(let url of urls){
-  let response  = await unirest.get(url)
+  let response  = await unirest.get(url.url)
                 .headers({
                   'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                   'accept-encoding':'gzip, deflate, br',
@@ -42,11 +46,15 @@ const urls = [
                genres.push(data);
             });
             moviesData.push({title, rating, image, ratingCount, releaseDate, genres});
+            const res = await fetch(image);
+            const buffer = await res.buffer();
+            fs.writeFile(`./${url.id}.jpg`, buffer, () =>
+             console.log('finished downloading!'));
      }
     console.log("data", moviesData);
-    const json2csvParser = new Parser();
-    const csv = json2csvParser.parse(moviesData);
-
-    fs.writeFileSync('./data.csv', csv, 'utf-8');
+    // const json2csvParser = new Parser();
+    // const csv = json2csvParser.parse(moviesData);
+    //
+    // fs.writeFileSync('./data.csv', csv, 'utf-8');
 
 })();
