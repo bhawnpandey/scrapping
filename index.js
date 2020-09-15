@@ -1,68 +1,42 @@
 const unirest = require('unirest');
 const cheerio = require('cheerio');
-const fs = require('fs');
-const { Parser } = require('json2csv');
-const fetch = require('node-fetch');
+
+(async()=>{
+   let username = "willsmith";
+   let base_url = `https://www.instagram.com/${username}`;
+   let response = await unirest.get(base_url);
+   const $ = cheerio.load(response.body);
+   let script = $('script[type="text/javascript"]').eq(3).html();
+   let script_exp = /window._sharedData = (.+);/g.exec(script);
+   let { entry_data: {ProfilePage: {[0]: {graphql: {user} }} } } = JSON.parse(script_exp[1]);
+   //console.log("user", user);
+
+   let intagram_data = {
+     followers: user.edge_followed_by.count,
+     following: user.edge_follow.count,
+     uploads: user.edge_owner_to_timeline_media.count,
+     profile_name: user.full_name,
+     profile_pic_url: user.profile_pic_url_hd
+   }
 
 
-const urls = [{
-              url: "https://www.imdb.com/title/tt7286456/?ref_=hm_fanfav_tt_2_pd_fp1",
-              id: "joker"
-            },{
-              url: "https://www.imdb.com/title/tt4154796/?ref_=ttls_li_tt",
-              id: "avengers_end_game"
-           }];
-
-
-(async() => {
-  let moviesData = [];
-  for(let url of urls){
-  let response  = await unirest.get(url.url)
-                .headers({
-                  'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                  'accept-encoding':'gzip, deflate, br',
-                  'accept-language':'en-US,en;q=0.9',
-                  'cache-control':'max-age=0',
-                  'sec-fetch-dest': 'document',
-                  'sec-fetch-mode': 'navigate',
-                  'sec-fetch-site': 'same-origin',
-                  'sec-fetch-user': '?1',
-                  'upgrade-insecure-requests': 1,
-                  'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'
-                });
-
-            const $ = cheerio.load(response.body);
-            let title = $('div[class="title_wrapper"] > h1').text().trim();
-            let rating = $('span[itemprop="ratingValue"]').text();
-            let image = $('div[class="poster"] > a > img').attr('src');
-            let ratingCount = $('div[class="imdbRating"] > a > span').text();
-            let releaseDate = $('a[title="See more release dates"]').text().trim();
-            //selector by Chrome
-            let popularity = $('#title-overview-widget > div.plot_summary_wrapper.localized > div.titleReviewBar > div:nth-child(5) > div.titleReviewBarSubItem > div:nth-child(2) > span').text().trim();
-            console.log("popularity", popularity);
-            let genres =[];
-            $('div[class="title_wrapper"] a[href^="/search/title?genres"]').each((i, ele)=>{
-              let data = $(ele).text();
-               genres.push(data);
-            });
-            moviesData.push({title, rating, image, ratingCount, releaseDate, genres});
-           let data = await new Promise(async(resolve, reject)=>{
-              try{
-                const res = await fetch(image);
-                const buffer = await res.buffer();
-                fs.writeFile(`./${url.id}.jpg`, buffer, () =>
-                 resolve('finished downloading!'));
-              }catch(err){
-                reject(err);
-              }
-           });
-           console.log("image data", data);
-
+     let { entry_data: {ProfilePage: {[0]: {graphql: { user: {edge_owner_to_timeline_media: { edges } } } }} } } = JSON.parse(script_exp[1]);
+     let posts = [];
+     for(let edge of edges){
+       let { node } = edge;
+       console.log("node ", node);
+       posts.push({
+         id: node.id,
+         shortcode: node.shortcode,
+         timestamp: node.taken_at_timestamp,
+         likes: node.edge_liked_by.count,
+         comments: node.edge_media_to_comment.count,
+         video_views: node.video_view_count,
+         caption: node.edge_media_to_caption.edges[0].node.text,
+         image_url: node.display_url
+       });
      }
-    console.log("data", moviesData);
-    // const json2csvParser = new Parser();
-    // const csv = json2csvParser.parse(moviesData);
-    //
-    // fs.writeFileSync('./data.csv', csv, 'utf-8');
+
+     console.log("posts", posts);
 
 })();
