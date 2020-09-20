@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const galaxy = puppeteer.devices['Galaxy Note 3'];
 (async () => {
   /*Simple example of puppeteer */
 
@@ -23,12 +24,20 @@ const puppeteer = require('puppeteer');
     // await browser.close();
 
     /*Get the url or title of the page */
-    const browser = await puppeteer.launch({ headless: false});
-    const page = await browser.newPage();
-    await page.goto('https://www.udemy.com/');
-    let title = await page.title();
-    console.log("the title of the page", title);
-    let url = await page.url();
-    console.log("the url of the page", url);
-    await browser.close();
+    // const browser = await puppeteer.launch({ headless: false});
+    // const page = await browser.newPage();
+    // await page.goto('https://www.udemy.com/');
+    // let title = await page.title();
+    // console.log("the title of the page", title);
+    // let url = await page.url();
+    // console.log("the url of the page", url);
+    // await browser.close();
+
+    /*Emulate a phone view*/
+   const browser = await puppeteer.launch({headless: false});
+   const page = await browser.newPage();
+   await page.emulate(galaxy);
+   await page.goto('https://www.udemy.com/');
+   await browser.close();
+
 })();
