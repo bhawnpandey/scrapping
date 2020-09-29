@@ -41,16 +41,29 @@ const galaxy = puppeteer.devices['Galaxy Note 3'];
    // await browser.close();
 
    /*setRequestInterception of page*/
-   const browser = await puppeteer.launch({headless: false});
-   const page = await browser.newPage();
-   await page.setRequestInterception(true);
-   page.on('request', interceptedRequest => {
-     if(["image","stylesheet","font"].includes(interceptedRequest.resourceType())){
-       interceptedRequest.abort();
-     }else{
-       interceptedRequest.continue();
+   // const browser = await puppeteer.launch({headless: false});
+   // const page = await browser.newPage();
+   // await page.setRequestInterception(true);
+   // page.on('request', interceptedRequest => {
+   //   if(["image","stylesheet","font"].includes(interceptedRequest.resourceType())){
+   //     interceptedRequest.abort();
+   //   }else{
+   //     interceptedRequest.continue();
+   //   }
+   // });
+   // await page.goto('https://www.amazon.in/');
+   // await browser.close();
+
+   /*Ignoring HTTPS/SSL Errors and changing the viewport*/
+   const browser = await puppeteer.launch({
+     headless: false,
+     ignoreHTTPSErrors: true,
+     defaultViewport:{
+       width: 1000,
+       height: 1000
      }
    });
-   await page.goto('https://www.amazon.in/');
+   const page = await browser.newPage();
+   await page.goto('https://www.google.com/');
    await browser.close();
 })();
