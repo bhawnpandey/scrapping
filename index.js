@@ -34,10 +34,23 @@ const galaxy = puppeteer.devices['Galaxy Note 3'];
     // await browser.close();
 
     /*Emulate a phone view*/
+   // const browser = await puppeteer.launch({headless: false});
+   // const page = await browser.newPage();
+   // await page.emulate(galaxy);
+   // await page.goto('https://www.udemy.com/');
+   // await browser.close();
+
+   /*setRequestInterception of page*/
    const browser = await puppeteer.launch({headless: false});
    const page = await browser.newPage();
-   await page.emulate(galaxy);
-   await page.goto('https://www.udemy.com/');
+   await page.setRequestInterception(true);
+   page.on('request', interceptedRequest => {
+     if(["image","stylesheet","font"].includes(interceptedRequest.resourceType())){
+       interceptedRequest.abort();
+     }else{
+       interceptedRequest.continue();
+     }
+   });
+   await page.goto('https://www.amazon.in/');
    await browser.close();
-
 })();
